@@ -1,0 +1,2217 @@
+gradle-in-action-chapter-notes
+==============================
+git@github.com:rwadhams/gradle-in-action.git
+git@github.com:bmuschko/gradle-in-action-source.git
+
+													+++++++++++++++++++++++++++++++++++++++++++++++++++++
+													+++ PART 1:   I N T R O D U C I N G   G R A D L E +++
+													+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+=============================================
+Chapter 01 Introduction to project automation
+=============================================
+1.1 Life without project automation
+1.2 Benefits of project automation
+1.3 Types of project automation
+1.4 Build tools
+1.5 Java build tools
+
+=============================================
+Chapter 02 Next-generation builds with Gradle
+=============================================
+2.1 Why Gradle? Why now?
+2.2 Gradle’s compelling feature set
+2.3 The bigger picture: continuous delivery
+2.4 Installing Gradle
+
+----------------------------------------------------------------------------------------------------------------------------------
+2.5 Getting started with Gradle
+----------------------------------------------------------------------------------------------------------------------------------
+/helloworld-task-doLast
+$ gradle -q helloWorld
+$ gradle -q hW
+	task abbreviation.
+
+/helloworld-task-left-shift
+	leftshift (<<) = doLast{}.
+$ gradle -q helloWorld
+
+/listing_02_01-dynamic-task-and-task-dependencies
+	implicit ANT task usage.
+	dynamic task definition.
+	task dependencies.
+$ gradle groupTherapy
+$ gradle tasks
+$ gradle tasks --all
+	The --all option is a great way to determine the execution order of a task graph.
+$ gradle gT -x yayGradle0
+	exclude task execution including it's dependant tasks.
+
+----------------------------------------------------------------------------------------------------------------------------------
+2.6 Using the Command line
+----------------------------------------------------------------------------------------------------------------------------------
+Gradle Command Line
+-------------------
+	-?, -h, --help
+	-b, --build-file
+	--offline
+
+	-D, --system-prop	e.g. –Dmyprop=myvalue
+	-P, --project-prop	e.g. –Pmyprop=myvalue
+
+	-i,--info
+	-s, --stacktrace
+	-q, --quiet
+
+	$ gradle tasks
+	$ gradle properties
+
+	--daemon
+	$ ps | grep gradle 
+	$ gradle --stop
+	--no-daemon
+
+===============================================
+Chapter 03 Building a Gradle project by example
+===============================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+3.1 Introducing the case study
+----------------------------------------------------------------------------------------------------------------------------------
+/listing_03_01-repository-interface
+	src/main/java/com/manning/gia/todo/model/ToDoItem.java
+	src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+
+/listing_03_02-in-memory-repository
+	src/main/java/com/manning/gia/todo/model/ToDoItem.java
+	src/main/java/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+
+/listing_03_03-main-class
+	src/main/java/com/manning/gia/todo/model/ToDoItem.java
+	src/main/java/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+	src/main/java/com/manning/gia/todo/ToDoApp.java
+	src/main/java/com/manning/gia/todo/utils/CommandLineInput.java
+	src/main/java/com/manning/gia/todo/utils/CommandLineInputHandler.java
+
+----------------------------------------------------------------------------------------------------------------------------------
+3.2 Building a Java project
+----------------------------------------------------------------------------------------------------------------------------------
+/listing_03_04-todo-app-changing-properties
+	src/main/java/com/manning/gia/todo/model/ToDoItem.java
+	src/main/java/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+	src/main/java/com/manning/gia/todo/ToDoApp.java
+	src/main/java/com/manning/gia/todo/utils/CommandLineInput.java
+	src/main/java/com/manning/gia/todo/utils/CommandLineInputHandler.java
+	build.gradle
+
+
+	$ gradle build
+		:compileJava
+		:processResources UP-TO-DATE
+		:classes
+		:jar
+		:assemble
+		:compileTestJava UP-TO-DATE
+		:processTestResources UP-TO-DATE
+		:testClasses UP-TO-DATE
+		:test UP-TO-DATE
+		:check UP-TO-DATE
+		:build
+		BUILD SUCCESSFUL
+		Total time: 4.439 secs
+
+	$ java -cp build/classes/main com.manning.gia.todo.ToDoApp
+		direct Main class execution
+
+	$ java -jar build/libs/listing_03_04-todo-app-changing-properties-0.1.jar
+		jar execution. artifact name = directory name = root project name
+
+
+/listing_03_05-todo-app-changing-project-layout
+	src/com/manning/gia/todo/model/ToDoItem.java
+	src/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	src/com/manning/gia/todo/repository/ToDoRepository.java
+	src/com/manning/gia/todo/ToDoApp.java
+	src/com/manning/gia/todo/utils/CommandLineInput.java
+	src/com/manning/gia/todo/utils/CommandLineInputHandler.java
+	build.gradle
+		uses 'sourceSets' to change source locations
+		buildDir
+
+	$ gradle build
+
+	$ java -jar out/libs/listing_03_05-todo-app-changing-project-layout-0.1.jar
+
+
+/todo-app
+	build.gradle (one-liner)
+		apply plugin: 'java'
+
+	$ java -cp build/classes/main com.manning.gia.todo.ToDoApp
+
+
+/todo-app-customized
+	build.gradle
+		apply plugin: 'java'
+		version, sourceCompatibility
+		sourceSets
+		buildDir
+		jar manifest Main-Class
+
+	$ java -jar out/libs/todo-app-customized-0.1.jar
+
+
+/todo-app-external-dependency
+	build.gradle
+		apply plugin: 'java'
+		repositories & dependencies
+		apply plugin: 'application'
+		mainClassName = 'com.manning.gia.todo.ToDoApp'
+		run block
+			task defined in Application plugin (see plugin doc)
+			set standardInput property
+		task runWithJavaExec(type: JavaExec)
+
+	$ gradle tasks
+		Application tasks
+		-----------------
+		run - Runs this project as a JVM application
+
+		Other tasks
+		-----------
+		runWithJavaExec
+
+	$ gradle run
+	$ gradle rWJE
+
+	Gradle Application plugin Doc: https://docs.gradle.org/current/userguide/application_plugin.html
+	Gradle JavaExec DSL: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+3.3 Web development with Gradle
+----------------------------------------------------------------------------------------------------------------------------------
+/todo-webapp
+	build.gradle
+		apply plugin: 'war'
+		apply plugin: 'jetty'
+		repositories & dependencies
+
+	$ gradle tasks
+		Build tasks
+		-----------
+		war - Generates a war archive with all the compiled classes, the web-app content and the libraries.
+
+		Web application tasks
+		---------------------
+		jettyRun - Uses your files as and where they are and deploys them to Jetty.
+		jettyRunWar - Assembles the webapp into a war and deploys it to Jetty.
+		jettyStop - Stops Jetty.
+
+	$ gradle build (includes the 'war' task)
+
+	Gradle War plugin Doc: https://docs.gradle.org/current/userguide/war_plugin.html
+	Gradle Jetty plugin Doc: https://docs.gradle.org/current/userguide/jetty_plugin.html
+
+
+/todo-webapp-customized
+	build.gradle
+		apply plugin: 'war'
+		webAppDirName = 'webfiles'
+
+		war {
+		    from 'static'
+		}
+
+	$ gradle build
+
+
+/todo-webapp-jetty
+	build.gradle
+		apply plugin: 'jetty'
+
+	$ gradle tasks
+		Web application tasks
+		---------------------
+		jettyRun - Uses your files as and where they are and deploys them to Jetty.
+		jettyRunWar - Assembles the webapp into a war and deploys it to Jetty.
+		jettyStop - Stops Jetty.
+
+	$ gradle jettyRun
+
+
+/todo-webapp-jetty-customized
+	build.gradle
+		apply plugin: 'jetty'
+		jettyRun {
+		    httpPort = 9090
+		    contextPath = 'todo'
+		}
+
+	$ gradle jettyRun
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+3.4 Gradle wrapper
+----------------------------------------------------------------------------------------------------------------------------------
+/todo-webapp-wrapper
+	build.gradle
+		task wrapper(type: Wrapper) {
+		    gradleVersion = '2.7'
+		}
+
+	$ gradle wrapper
+	
+	$ ./gradlew -v
+
+
+									++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+									+++ PART 2:   M A  S T E R I N G   T H E   F U N D A M E N T A L S +++
+									++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+==================================
+Chapter 04 Build script essentials
+==================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+4.1 Building blocks
+----------------------------------------------------------------------------------------------------------------------------------
+Every Gradle build consists of three basic building blocks: projects, tasks, and properties.
+Each build contains at least one project, which in turn contains one or more tasks.
+Projects and tasks expose properties that can be used to control the build.
+
+Projects
+--------
+In Gradle’s terminology a project represents a component you’re trying to build (for example, a JAR file),
+or a goal you’re trying to achieve, like deploying an application.
+Gradle’s equivalent to Maven’s pom.xml is the build.gradle file.
+Each Gradle build script defines at least one project.
+When starting the build process, Gradle instantiates the class org.gradle.api.Project based
+on your configuration in build.gradle and makes it implicitly available through the project variable.
+A project can create new tasks, add dependencies and configurations, and apply plug-ins and other build scripts.
+Many of its properties, like name and description, are accessible via getter and setter methods.
+
+The Project instance gives you programmatic access to all Gradle features in your build,
+like task creation and dependency management. Keep in mind that you’re not required to use the
+project variable when accessing properties and methods of your project — it’s assumed you mean the Project instance.
+
+/project-description
+	build.gradle
+		setDescription("myProject")
+		println "Description of project $name: " + project.description
+
+Gradle provides support for multiproject builds.
+One of the most important principles of software development is separation of concerns.
+The more complex a software system becomes, the more you want to decompose it into modularized functionality,
+in which modules can depend on each other. Each of the decomposed parts would be represented as a Gradle project
+with its own build.gradle script.
+
+Tasks
+-----
+Important capabilities of a task: task actions and task dependencies.
+An action defines an atomic unit of work that’s executed when the task is run.
+Many times a task requires another task to run first. This is especially true if the task depends on
+the produced output of another task as input to complete its own actions.
+Gradle’s API representation of a task is the interface org.gradle.api.Task.
+
+Properties
+----------
+Each instance of Project and Task provides properties that are accessible through getter and setter methods. 
+A property could be a task’s description or the project’s version.
+Often, you’ll want to define your own properties.
+For example, you may want to declare a variable that references a file that’s used multiple times within the same build script.
+Gradle allows defining user-defined variables through extra properties.
+
+Extra Properties
+----------------
+	project.ext.myProp = 'myValue'
+	
+	ext {
+	   someOtherProp = 123
+	}
+	
+	assert myProp == 'myValue'
+	println project.someOtherProp
+	ext.someOtherProp = 567
+
+/extra-properties
+	build.gradle
+
+	$ gradle properties
+
+Gradle Properties
+-----------------
+Properties can be directly injected into your project by declaring them in a properties file named gradle.properties
+under the directory <USER_HOME>/.gradle or a project’s root directory. 
+They can be accessed via the project instance.
+Let’s assume the following properties are declared in your gradle.properties file:
+	exampleProp = myValue
+	someOtherProp = 455
+
+You can access both variables in your project as follows:
+	assert project.exampleProp == 'myValue'
+	task printGradleProperty << {
+	   println "Second property: $someOtherProp"
+	}
+
+/gradle-properties
+	build.gradle
+	gradle.properties
+
+	$ gradle properties
+
+
+Other Ways To Declare Properties
+--------------------------------
+Project property via the –P command-line option
+System property via the –D command-line option
+Environment property following the pattern: ORG_GRADLE_PROJECT_propertyName=someValue
+
+----------------------------------------------------------------------------------------------------------------------------------
+4.2 Working with tasks
+----------------------------------------------------------------------------------------------------------------------------------
+/print-version-task-doLast
+	build.gradle
+
+
+/print-version-task-doFirst
+	build.gradle
+
+
+Explains adding actions to existing tasks, first or last.
+
+/add-task-actions
+	build.gradle
+
+
+/defaulttask-logger-usage
+	build.gradle
+
+	uses a logger
+
+
+/defaulttask-group-description-props
+	build.gradle
+
+	$ gradle tasks
+		Versioning tasks
+		----------------
+		printVersion - Prints project version.
+
+/defaulttask-group-description-setter
+	build.gradle
+
+
+In Gradle, the task execution order is not deterministic.
+
+/listing_04_01-task-dependencies
+	build.gradle
+		uses dependsOn()
+
+	$ gradle -q third
+		first
+		second
+		Version: 0.1-SNAPSHOT
+		third
+
+Task Dependency Execution Order
+-------------------------------
+It’s important to understand that Gradle doesn’t guarantee the order in which the dependencies of a task are executed. 
+The method call dependsOn() only defines that the dependent tasks need to be executed beforehand. 
+Gradle’s philosophy is to declare what should be executed before a given task, not how it should be executed. 
+This concept is especially hard to grasp if you’re coming from a build tool that defines its dependencies imperatively, like Ant does. 
+In Gradle, the execution order is automatically determined by the input/output specification of a task. 
+This architectural design decision has many benefits.
+On the one hand, you don’t need to know the whole chain of task dependencies to make a change, 
+which improves code maintainability and avoids potential breakage. 
+On the other hand, because your build doesn’t have to be executed strictly sequentially, it’s been enabled for
+parallel task execution, which can significantly improve your build execution time.
+
+/finalizer-task
+	build.gradle
+		first.finalizedBy second
+
+	$ gradle -q first
+		first
+		second
+
+
+/listing_04_02-project-version-pogo
+	build.gradle
+		version = version = new ProjectVersion(0, 1)
+		class ProjectVersion { /* pogo code here */}
+		task printVersion << {logger.quiet "Version: $version"}
+
+	$ gradle -q printVersion
+		Version: 0.1-SNAPSHOT
+
+
+Adding A Task Configuration Block
+---------------------------------
+A task named loadVersion to read the version classifiers from the properties file and 
+assign the newly created instance of ProjectVersion to the project’s version field.
+At first sight, the task may look like any other task you defined before. 
+But if you look closer, you’ll notice that you didn’t define an action or use the left shift operator.
+Gradle calls this a 'task configuration'.
+
+Task configuration blocks are always executed before task actions.
+The key to fully understanding this behavior is the Gradle build lifecycle.
+
+/listing_04_03-configuration-task
+	build.gradle
+		ext.versionFile = file('version.properties')
+		task loadVersion {
+			project.version = readVersion() 	//method
+		}
+
+
+Gradle’s Build Lifecycle Phases
+-------------------------------
+Whenever you execute a Gradle build, three distinct lifecycle phases are run:
+	Initialization phase
+	Configuration phase
+	Execution phase
+
+During the 'initialization phase', Gradle creates a Project instance for your project.
+In the context of a multiproject build, this build phase becomes more important.
+Depending on which project you’re executing, Gradle figures out which of the
+project dependencies need to participate in the build. This is important in multi-project builds.
+Note:  No existing build script code is executed in this phase. 
+
+The 'configuration phase'. Internally, Gradle constructs a model representation of the tasks that will take part in the build.
+The incremental build feature determines if any of the tasks in the model are required to be run. 
+This phase is perfect for setting up the configuration that’s required for your project or specific tasks.
+
+Note: All configuration code is executed with every build of your project — even if you just execute 'gradle tasks'.
+
+In the 'execution phase' tasks are executed in the correct order. 
+The execution order is determined by their dependencies. 
+Tasks that are considered up to date are skipped.
+If task B depends on task A, then the execution order would be A → B when you run gradle B on the command line.
+
+
+/listing_04_04-make-release-task
+	build.gradle
+		ext.versionFile = file('version.properties')
+		task loadVersion { project.version = readVersion() }
+		ProjectVersion readVersion() {}
+		task printVersion << { logger.quiet "Version: $version" }
+		task makeReleaseVersion(group: 'versioning', description: 'Makes project a release version.') << {
+		    version.release = true
+		    ant.propertyfile(file: versionFile) {
+		        entry(key: 'release', type: 'string', operation: '=', value: 'true')
+		    }
+		}
+		class ProjectVersion {}
+
+		$ gradle -q pV
+			Version: 0.1-SNAPSHOT
+		$ gradle -q mRV
+			Reading the version file.
+		$ gradle -q pV
+			Version: 0.1
+
+
+Declaring task inputs and outputs
+---------------------------------
+Gradle determines if a task is up to date by comparing a snapshot of a task’s inputs and outputs between two builds.
+A task is considered up to date if inputs and outputs haven’t changed since the last task execution.
+Therefore, the task only runs if the inputs and outputs are different; otherwise, it’s skipped.
+
+An input can be a directory, one or more files, or an arbitrary property. 
+A task’s output is defined through a directory or 1...n files. 
+Inputs and outputs are defined as fields in class DefaultTask and have a direct class representation.
+
+/listing_04_05-task-inputs-outputs
+	build.gradle
+		task makeReleaseVersion() {
+		    inputs.property('release', version.release)
+		    outputs.file versionFile
+
+		    doLast {
+		        version.release = true
+		        ant.propertyfile(file: versionFile) {
+		            entry(key: 'release', type: 'string', operation: '=', value: 'true')
+		        }
+		    }
+		}
+		The code you wanted to execute was moved into a doLast action closure and
+		the left shift operator has been removed from the task declaration.
+		Now there's clear separation between the configuration and action code.
+
+		$ gradle mRV
+			Reading the version file.
+			:makeReleaseVersion
+		$ gradle mRV
+			Reading the version file.
+			:makeReleaseVersion UP-TO-DATE
+
+
+/listing_04_06-custom-task-definition
+	build.gradle
+		class ReleaseVersionTask extends DefaultTask {
+		    @Input Boolean release
+		    @OutputFile File destFile
+
+		    ReleaseVersionTask() { }
+
+		    @TaskAction
+		    void start() { }
+		}
+
+
+/listing_04_07-custom-task-usage
+	build.gradle
+		task makeReleaseVersion(type: ReleaseVersionTask) {
+		    release = version.release
+		    destFile = versionFile
+		}
+
+	$ gradle -q mRV
+		Reading the version file.
+		:makeReleaseVersion
+
+
+/listing_04_08-different-project-version-pogo
+
+
+/listing_04_09-custom-task-reusability
+
+
+Task types have incremental build support built in. 
+Running the tasks multiple times in a row will mark them as up-to-date if you don’t change any of the source files.
+
+/listing_04_10-built-in-tasks
+	build.gradle
+		apply plugin: 'war'
+
+		ext.versionFile = file('version.properties')
+
+		task loadVersion { }
+
+		ProjectVersion readVersion() { }
+
+		task makeReleaseVersion() << { }
+
+		task createDistribution(type: Zip, dependsOn: makeReleaseVersion) {
+		    from war.outputs.files
+
+		    from(sourceSets*.allSource) {
+		        into 'src'
+		    }
+
+		    from(rootDir) {
+		        include versionFile.name
+		    }
+		}
+
+		task backupReleaseDistribution(type: Copy) {
+		    from createDistribution.outputs.files
+		    into "$buildDir/backup"
+		}
+
+		task release(dependsOn: backupReleaseDistribution) << {
+		    logger.quiet 'Releasing the project...'
+		}
+
+		class ProjectVersion { }
+
+	$ gradle release
+
+
+/listing_04_11-increment-minor-major-version
+	build.gradle
+		task incrementMajorVersion() << { }
+		task incrementMinorVersion() << { }
+
+	$ gradle -i incrementMajorVersion
+
+
+Task Rule-Naming Pattern
+------------------------
+Gradle also introduces the concept of a task rule, which executes specific logic based on a task name pattern. 
+The pattern consists of two parts: the static portion of the task name and a placeholder. 
+Together they form a dynamic task name.
+
+/listing_04_12-task-rule
+	build.gradle
+		tasks.addRule("Pattern: increment<Classifier>Version – Increments the project version classifier.") { String taskName ->
+		    if (taskName.startsWith('increment') && taskName.endsWith('Version')) {
+		        task(taskName) << {
+		            String classifier = (taskName - 'increment' - 'Version').toLowerCase()
+		            String currentVersion = version.toString()
+
+		            switch (classifier) {
+		                case 'major': ++version.major
+		                    break
+		                case 'minor': ++version.minor
+		                    break
+		                default: throw new GradleException("Invalid version type '$classifier. Allowed types: ['Major', 'Minor']")
+		            }
+
+		            String newVersion = version.toString()
+		            logger.info "Incrementing $classifier project version: $currentVersion -> $newVersion"
+
+		            ant.propertyfile(file: versionFile) {
+		                entry(key: classifier, type: 'int', operation: '+', value: 1)
+		            }
+		        }
+		    }
+		}
+
+	$ gradle -q tasks
+		Rules
+		-----
+		Pattern: increment<Classifier>Version – Increments the project version classifier.
+
+	$ gradle -q incrementMinorVersion
+		:incrementMinorVersion
+
+
+/using-buildsrc
+	buildSrc/src/main/groovy/com/manning/gia/ProjectVersion.groovy
+	buildSrc/src/main/groovy/com/manning/gia/ReleaseVersionTask.groovy
+
+	build.gradle
+		import com.manning.gia.ProjectVersion
+		import com.manning.gia.ReleaseVersionTask
+
+	$ gradle -q release
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+4.3 Hooking into the build lifecycle
+----------------------------------------------------------------------------------------------------------------------------------
+As a build script developer, you’re not limited to writing task actions or configuration logic, 
+which are evaluated during a distinct build phase. Sometimes you’ll want to execute code when a
+specific lifecycle event occurs. A lifecycle event can occur before, during, or after a specific build phase.
+e.g.
+	gradle.beforeProject 		(between Initialization phase and Configuration phase)
+	gradle.taskGraph.whenReady 	(between Configuration phase and Execution phase)
+	gradle.buildFinished 		(after Execution phase)
+
+Many of the lifecycle callback methods are defined in the interfaces Project and Gradle.
+
+Internal Task Graph Representation
+----------------------------------
+At configuration time, Gradle determines the order of tasks that need to be run during the execution phase. 
+The internal structure that represents these task dependencies is modeled as a directed acyclic graph (DAG). 
+Each task in the graph is called a node, and each node is connected by directed edges. 
+You’ve most likely created these connections between nodes by declaring a dependsOn relationship for a task or
+by leveraging the implicit task dependency interference mechanism. 
+It’s important to note that DAGs never contain a cycle. 
+In other words, a task that has been executed before will never be executed again.
+
+Because you know that the logic is run before any of the tasks in the graph are executed, 
+you can completely remove the task makeReleaseVersion and omit the dependsOn declaration from createDistribution.
+
+/listing_04_13-task-graph-hook
+	build.gradle
+		gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
+		    if (taskGraph.hasTask(release)) {
+		        if (!version.release) {
+		            version.release = true
+		            ant.propertyfile(file: versionFile) {
+		                entry(key: 'release', type: 'string', operation: '=', value: 'true')
+		            }
+		        }
+		    }
+		}
+
+	$ gradle -q release
+
+
+/listing_04_14-task-graph-listener
+	build.gradle
+		class ReleaseVersionListener implements TaskExecutionGraphListener {
+		    final static String releaseTaskPath = ':release'
+
+		    @Override
+		    void graphPopulated(TaskExecutionGraph taskGraph) {
+		        if (taskGraph.hasTask(releaseTaskPath)) {
+		            List<Task> allTasks = taskGraph.allTasks
+		            Task releaseTask = allTasks.find { it.path == releaseTaskPath }
+		            Project project = releaseTask.project
+
+		            if (!project.version.release) {
+		                project.version.release = true
+		                project.ant.propertyfile(file: project.versionFile) {
+		                    entry(key: 'release', type: 'string', operation: '=', value: 'true')
+		                }
+		            }
+		        }
+		    }
+		}
+
+		gradle.taskGraph.addTaskExecutionGraphListener(new ReleaseVersionListener())
+
+	$ gradle -q release
+
+
+/listing_04_15-build-announcements
+	build-announcements.gradle
+		gradle.projectsLoaded { Gradle gradle ->
+		    gradle.rootProject {
+		        apply plugin: 'build-announcements'
+		    }
+		}
+
+Place in <USER_HOME>/.gradle/init.d
+
+
+================================
+Chapter 05 Dependency management
+================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.1 A quick overview of dependency management
+----------------------------------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.2 Learning dependency management by example
+----------------------------------------------------------------------------------------------------------------------------------
+Dependency management for a project is configured with the help of two DSL configuration blocks: dependencies and repositories. 
+The names of the configuration blocks directly map to methods of the interface Project. 
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.3 Dependency configurations
+----------------------------------------------------------------------------------------------------------------------------------
+
+Understanding the configuration API representation
+--------------------------------------------------
+Configurations can be directly added and accessed at the root level of a project.
+You can decide to use one of the configurations provided by a plugin or declare your own. 
+Every project owns a container of class ConfigurationContainer that manages the corresponding configurations. 
+Configurations are very flexible in their behavior. 
+You can control whether transitive dependencies should be part of the dependency resolution, 
+define the resolution strategy and even make configurations extend to each other.
+
+Another way of thinking of configurations is in terms of a logical grouping. 
+Grouping dependencies by configuration is a similar concept to organizing Java classes into packages. 
+Packages provide unique namespaces for classes they contain. The same is true for configurations. 
+They group dependencies that serve a specific responsibility.
+The Java plugin already provides six configurations out of the box:
+	compile
+	run- time
+	testCompile
+	testRuntime
+	archives
+	default
+
+/listing_05_01-defining-cargo-configuration
+	build.gradle
+		configurations {
+		    cargo {
+		        description = 'Classpath for Cargo Ant tasks.'
+		        visible = false
+		    }
+		}
+
+	$ gradle dependencies
+		cargo - Classpath for Cargo Ant tasks.
+		No dependencies
+
+
+/listing_05_02-accessing-cargo-configuration
+	build.gradle
+		task deployToLocalTomcat << {
+		    FileTree cargoDependencies = configurations.getByName('cargo').asFileTree
+		    ant.taskdef(resource: 'cargo.tasks', classpath: cargoDependencies.asPath)
+
+		    ant.cargo(containerId: 'tomcat7x', action: 'run', output: "$buildDir/output.log") {
+		        configuration {
+		            deployable(type: 'war', file: 'todo.war')
+		        }
+
+		        zipUrlInstaller(installUrl: 'http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.32/bin/apache-tomcat-7.0.32.zip')
+		    }
+		}
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.4 Declaring dependencies
+----------------------------------------------------------------------------------------------------------------------------------
+
+Declaring dependencies
+----------------------
+The DSL configuration block dependencies is used to assign one or more dependencies to a configuration. 
+External dependencies are not the only dependencies you can declare for your project.
+Below lists the various types of dependencies: 
+	External module dependency
+		A dependency on an external library in a repository including its provided metadata
+
+	File dependency
+		A dependency on a set of files in the file system
+
+	Project dependency 
+		A dependency on another Gradle project
+
+	Client module dependency
+		A dependency on an external library in a repository with the ability to declare the metadata yourself
+
+	Gradle runtime dependency
+		A dependency on Gradle’s API or a library shipped with the Gradle runtime
+
+Understanding the dependency API representation
+-----------------------------------------------
+Every Gradle project has an instance of a dependency handler, which is represented by the interface DependencyHandler. 
+You obtain a reference to the dependency handler by using the project’s getter method getDependencies(). 
+Each of the dependency type is declared through a method of the dependency handler
+within the project’s dependencies configuration block. 
+Each dependency is an instance of type Dependency. 
+The attributes group, name, version, and classifier clearly identify a dependency. 
+
+
+Dependency Attributes
+---------------------
+When the dependency manager looks for a dependency on a repository, it locates it through the combination of attributes. 
+At a minimum, a dependency needs to provide a name. 
+	group:		This attribute usually identifies an organization, company, or project. 
+				The group may use a dot notation, but it’s not mandatory (e.g. org.hibernate).
+	name:		An artifact’s name uniquely describes the dependency (e.g. hibernate-core).
+	version:	A library may be available in many versions. 
+				Many times the version string consists of a major and a minor version (e.g. 3.6.3-Final).
+	classifier:	Sometimes an artifact defines another attribute, the classifier, which is used to 
+				distinguish artifacts with the same group, name, and version, but it needs further specification.
+
+/listing_05_03-declaring-cargo-dependencies
+	build.gradle
+		ext.cargoGroup = 'org.codehaus.cargo'
+		ext.cargoVersion = '1.3.1'
+
+		// two formats for dependency notation
+		dependencies {
+		    cargo group: cargoGroup, name: 'cargo-core-uberjar', version: cargoVersion
+		    cargo "$cargoGroup:cargo-ant:$cargoVersion"
+		}
+
+		repositories {
+		    mavenCentral()
+		}
+
+	$ gradle deployToLocalTomcat		* * * *  DOESN'T WORK - INVESTIGATE AND FIX  * * * *
+
+	$ gradle -q dependencies
+		cargo - Classpath for Cargo Ant tasks.
+		+--- org.codehaus.cargo:cargo-core-uberjar:1.3.1
+		|    +--- commons-discovery:commons-discovery:0.4
+		|    |    \--- commons-logging:commons-logging:1.0.4
+		|    +--- jdom:jdom:1.0
+		...
+
+
+Notice that the exclusion attributes are slightly different from the regular dependency notation. 
+You can use the attributes group and/or module. 
+Gradle doesn’t allow you to exclude only a specific version of a dependency, so the version attribute isn’t available.
+
+/listing_05_04-cargo-dependencies-single-exclusion
+	build.gradle
+		dependencies {
+		    cargo('org.codehaus.cargo:cargo-ant:1.3.1') {
+		        exclude group: 'xml-apis', module: 'xml-apis'
+		    }
+		    cargo 'xml-apis:xml-apis:2.0.2'
+		}
+
+	$ gradle -q dependencies
+
+
+Gradle lets you exclude all transitive dependencies using the transitive attribute.
+
+/listing_05_05-cargo-dependencies-all-exclusion
+	build.gradle
+		dependencies {
+		    cargo('org.codehaus.cargo:cargo-ant:1.3.1') {
+		        transitive = false
+		    }
+
+		    // Selectively declare required dependencies
+		    cargo 'org.codehaus.cargo:cargo-core-uberjar:1.3.1'
+		}
+
+	$ gradle -q dependencies
+
+
+Dynamic version declarations have a specific syntax.
+If you want to use the latest version of a dependency, you’ll have to use the placeholder latest.integration. 
+To declare the latest version for the Cargo Ant tasks, you’d use org.codehaus.cargo:cargo-ant:latest-integration. 
+Alternatively, you can declare the part of the version attribute you want to be dynamic by demarcating it with a plus sign (+).
+
+When should I use dynamic versions?
+-----------------------------------
+The short answer is rarely or even never. 
+A reliable and reproducible build is para- mount. Choosing the latest version of a library may cause your build to fail. 
+Even worse, without knowing it, you may introduce incompatible library versions and side effects that are hard to find 
+and only occur at runtime of your application. Therefore, declaring the exact version of a library should be the norm.
+
+/listing_05_06-cargo-dependencies-dynamic-version
+	build.gradle
+		dependencies {
+		    cargo 'org.codehaus.cargo:cargo-ant:1.+'
+		}
+
+	$ gradle -q dependencies
+
+
+/listing_05_07-copy-cargo-dependencies-to-directory
+	build.gradle
+		dependencies {
+		    cargo 'org.codehaus.cargo:cargo-ant:1.3.1'
+		}
+
+		task copyDependenciesToLocalDir(type: Copy) {
+		    from configurations.cargo.asFileTree
+		    //into "${System.properties['user.home']}/tmp/libs/cargo"
+		    //into "${System.getenv('HOME')}/tmp/libs/cargo"
+		    into "$rootDir/libs/cargo"
+		}
+
+Setup script only. Uses a Copy task.
+
+	$ gradle -q copyDependenciesToLocalDir
+
+
+/listing_05_08-cargo-file-dependencies
+	build.gradle
+		dependencies {
+		    cargo fileTree(dir: "${System.properties['user.home']}/tmp/libs/cargo", include: '*.jar')
+		}
+
+	$ gradle -q dependencies
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.5 Using and configuring repositories
+----------------------------------------------------------------------------------------------------------------------------------
+
+Using and configuring repositories
+----------------------------------
+Gradle puts a special emphasis on supporting existing repository infrastructures.
+Repository types for a Gradle project:
+	Maven repository
+		A Maven repository on the local file system or a remote server, or the preconfigured Maven Central
+
+	Ivy repository
+		An Ivy repository on the local file system or a remote server with a specific layout pattern
+
+	Flat directory repository
+		A repository on the local file system without metadata support
+
+Understanding the repository API representation
+-----------------------------------------------
+Central to defining repositories in your project is the interface RepositoryHandler, 
+which provides methods to add various types of repositories. 
+From the project, these methods are invoked within your repositories configuration block. 
+You can declare more than one repository. When the dependency manager tries to download 
+the dependency and its metadata, it checks the repositories in the order of declaration. 
+The repository that provides the dependency first wins. Subsequent repository declarations 
+won’t be checked further for the specific dependency. 
+Each repository interfaces exposes different methods specific to the type of repository.
+
+Maven repositories
+------------------
+The library is usually represented in the form of a JAR file. 
+The metadata is expressed in XML and describes relevant information about the library and 
+its transitive dependencies, the POM file. 
+Both artifacts are stored in a predefined directory structure in the repository. 
+When you declare a dependency in your build script, its attributes are used to derive the exact location in the repository. 
+The dot character in the group attribute of a dependency indicates a subdirectory in the Maven repository.
+
+The interface RepositoryHandler provides two methods that allow you to define preconfigured Maven repositories. 
+The method mavenCentral() adds a reference to Maven Central to the list of repositories,
+and the method mavenLocal() refers to a local Maven repository in your file system.
+
+repositories {
+   mavenCentral()	// http://repo1.maven.org/maven2
+   mavenLocal()		// <USER_HOME>/.m2/repository
+}
+
+/listing_05_09-custom-maven-repository
+	build.gradle
+		dependencies {
+		    cargo 'org.codehaus.cargo:cargo-ant:1.3.1'
+		}
+
+		repositories {
+		    maven {
+		        name 'Custom Maven Repository'
+		        url 'http://repository-gradle-in-action.forge.cloudbees.com/release/'
+		    }
+		}
+
+	$ gradle -q dependencies
+
+
+Ivy repositories
+----------------
+Artifacts in a Maven repository have to be stored with a fixed layout. 
+Any deviation from that structure results in irresolvable dependencies. 
+On the other hand, even though an Ivy repository proposes a default layout, it’s fully customizable. 
+In Ivy, repository dependency metadata is stored in a file named ivy.xml. 
+Gradle provides a wide variety of methods to configure Ivy repositories and their specific layout in your build. 
+As with the POM in Maven repositories, you’re not forced to use the Ivy metadata to resolve transitive dependencies. 
+The Ivy repository is perfect for resolving dependencies that don’t necessarily follow the standard Maven artifact pattern. 
+
+/listing_05_10-ivy-repository
+	build.gradle
+		configurations { spring }
+
+		dependencies { 
+		    spring group: 'org.springframework', name: 'org.springframework.core', version: '3.0.5.RELEASE', configuration: 'compile'
+		}
+
+		repositories {
+		    ivy {
+		        url 'http://repository.springsource.com/ivy/bundles/release'
+		        layout 'pattern', {
+		            artifact '[organisation]/[module]/[revision]/[artifact]-[revision].[ext]'
+		            ivy '[organisation]/[module]/[revision]/ivy-[revision].xml'
+		        }
+		    }
+
+		    ivy {
+		        url 'http://repository.springsource.com/ivy/bundles/external'
+		        layout 'maven'
+		    }
+		}
+
+	$ gradle -q dependencies
+
+
+Flat directory repositories
+---------------------------
+The simplest and most rudimentary form of a repository is the flat directory repository. 
+It’s a single directory in the file system that contains only the JAR files, with no metadata.
+When you declare your dependencies, you can only use the attributes name and version. 
+The group attribute is not evaluated and leads to an unresolved dependency if you try to use it.
+
+Having metadata that automatically declares transitive dependencies in very useful. 
+In the case of the flat directory repository, you don’t have this information, so you need to 
+declare every single dependency by itself, which can become quite tiring.
+
+/listing_05_11-flat-directory-repository
+	build.gradle
+		dependencies {
+		    cargo name: 'activation', version: '1.1'
+		    cargo name: 'ant', version: '1.7.1'
+		    cargo name: 'ant-launcher', version: '1.7.1'
+		    cargo name: 'cargo-ant', version: '1.3.1'
+		    cargo name: 'cargo-core-uberjar', version: '1.3.1'
+		    cargo name: 'commons-discovery', version: '0.4'
+		    cargo name: 'commons-logging', version: '1.0.4'
+		    cargo name: 'dom4j', version: '1.4'
+		    cargo name: 'isorelax', version: '20020414'
+		    cargo ':jaxb-api:2.1', ':jaxb-impl:2.1.13', ':jaxen:1.0-FCS', ':jdom:1.0', ':msv:20020414',
+		            ':relaxngDatatype:20020414', ':saxpath:1.0-FCS', ':stax-api:1.0-2', ':xercesImpl:2.8.1',
+		            ':xml-apis:1.3.03'
+		}
+
+		repositories {
+		    flatDir(dir: "${System.properties['user.home']}/tmp/libs/cargo", name: 'Local libs directory')
+		}
+
+
+	$ gradle -q dependencies
+		cargo - Classpath for Cargo Ant tasks.
+		+--- :activation:1.1
+		+--- :ant:1.7.1
+		+--- :ant-launcher:1.7.1
+		+--- :cargo-ant:1.3.1
+		+--- :cargo-core-uberjar:1.3.1
+		...
+		+--- :xercesImpl:2.8.1
+		\--- :xml-apis:1.3.03
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.6 Understanding the local dependency cache
+----------------------------------------------------------------------------------------------------------------------------------
+So far we’ve discussed how to declare dependencies and configure various types of repositories to resolve those artifacts. 
+Gradle automatically determines whether a dependency is needed for the task you want to execute,
+downloads the artifacts from the repositories, and stores them in the local cache. 
+Any subsequent build will try to reuse these artifacts.
+
+Analyzing the cache structure
+-----------------------------
+Gradle’s root directory for storing dependencies in the local cache is <USER_HOME>/.gradle/caches. 
+The next part of the path, artifact-15, is an identifier that’s specific to the Gradle version. 
+It’s needed to differentiate changes to the way metadata is stored.
+Bear in mind that this structure may change with newer versions of Gradle. 
+The actual cache is divided into two parts. 
+The subdirectory filestore contains the raw binaries downloaded from the repository. 
+Additionally, you’ll find some binary files that store metadata about the downloaded artifacts. 
+You’ll never need to look at them during your day-to-day business.
+
+/listing_05_12-printing-cargo-dependencies
+	build.gradle
+		task printDependencies << {
+		    configurations.getByName('cargo').each { dependency ->
+		        println dependency
+		    }
+		}
+
+	$ gradle -q printDependencies
+		/Users/rwadhams/.gradle/caches/
+		modules-2/files-2.1/
+		org.codehaus.cargo/
+		cargo-ant/
+		1.3.1/
+		a5a790c6f1abd6f4f1502fe5e17d3b43c017e281/
+		cargo-ant-1.3.1.jar
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+5.7 Troubleshooting dependency problems
+----------------------------------------------------------------------------------------------------------------------------------
+/cargo-dependencies-fail-on-version-conflict
+	build.gradle
+		configurations.cargo.resolutionStrategy {
+		    failOnVersionConflict()
+		}
+
+	$ gradle -q dependencies
+		cargo - Classpath for Cargo Ant tasks.
+
+		FAILURE: Build failed with an exception.
+
+		* What went wrong:
+		Execution failed for task ':dependencies'.
+		> Could not resolve all dependencies for configuration ':cargo'.
+		   > A conflict was found between the following modules:
+		      - xml-apis:xml-apis:1.3.03
+		      - xml-apis:xml-apis:1.0.b2
+
+
+/cargo-dependencies-force
+	build.gradle
+		ext.cargoGroup = 'org.codehaus.cargo'
+		ext.cargoVersion = '1.3.1'
+
+		dependencies {
+		    cargo "$cargoGroup:cargo-ant:$cargoVersion"
+		}
+
+		configurations.cargo.resolutionStrategy {
+		    force "$cargoGroup:cargo-ant:1.3.0"
+		}
+
+	$ gradle -q dependencies
+		cargo - Classpath for Cargo Ant tasks.
+		\--- org.codehaus.cargo:cargo-ant:1.3.1 -> 1.3.0
+		     \--- org.codehaus.cargo:cargo-core-uberjar:1.3.0
+		          +--- commons-discovery:commons-discovery:0.4
+		          |    \--- commons-logging:commons-logging:1.0.4
+		          +--- jdom:jdom:1.0
+
+Gradle provides a different type of report: the dependency insight report, which explains how and why a dependency is in the graph.
+
+	$ gradle -q dependencyInsight --configuration cargo --dependency xml-apis:xml-apis
+		xml-apis:xml-apis:1.3.03 (conflict resolution)
+		+--- org.codehaus.cargo:cargo-core-uberjar:1.3.0
+		|    \--- org.codehaus.cargo:cargo-ant:1.3.0
+		|         \--- cargo
+		\--- xerces:xercesImpl:2.8.1
+		     \--- org.codehaus.cargo:cargo-core-uberjar:1.3.0 (*)
+
+		xml-apis:xml-apis:1.0.b2 -> 1.3.03
+		\--- dom4j:dom4j:1.4
+		     \--- org.codehaus.cargo:cargo-core-uberjar:1.3.0
+		          \--- org.codehaus.cargo:cargo-ant:1.3.0
+		               \--- cargo
+
+
+/dependency-resolution-api
+	build.gradle
+		task printDependencies << {
+		    configurations.cargo.incoming.resolutionResult.allDependencies { DependencyResult dependencyResult ->
+		        ModuleVersionSelector selector = dependencyResult.requested
+		        println "$selector.group:$selector.name:$selector.version ($selector)"
+		    }
+		}
+
+	$ gradle -q printDependencies 		//didn't work
+
+
+Refreshing the cache
+--------------------
+To avoid having to hit a repository over and over again for specific types of dependencies, Gradle applies certain caching strategies. 
+This is the case for snapshot versions of a dependency and dependencies that were declared with a dynamic version pattern. 
+Once resolved, they’re cached for 24 hours, which leads to snappier, more efficient builds. 
+After the artifact caching timeframe is expired, the repository is checked again and
+a new version of the artifact is downloaded if it has changed.
+
+You can manually refresh the dependency in your cache by using the command-line option --refresh-dependencies. 
+This flag forces a check for changed artifact versions with the configured repositories. 
+If the checksum changed, the dependency will be downloaded again and replace the existing copy in the cache. 
+Having to add the command-line options can become tiring after a while, or you may forget to tag it on. 
+Alternatively, you can configure a build to change the default behavior of your cache.
+Let’s say you’ve always wanted to the get latest 1.x version of the Cargo Ant tasks you declared with org.codehaus.cargo:cargo-ant:1.+. 
+You can set the cache timeout for dynamic dependency versions to 0 seconds, as shown in the following code snippet:
+
+    configurations.cargo.resolutionStrategy {
+        cacheDynamicVersionsFor 0, 'seconds'
+	}
+
+You may have good reasons for not wanting to cache a SNAPSHOT version of an external module. 
+For example, another team in your organization works on a reusable library that’s shared among multiple projects. 
+During development the code changes a lot, and you always want to get the latest and (hopefully) greatest additions to the code. 
+The following code block modifies the resolution strategy for a configuration to not cache SNAPSHOT versions at all:
+
+    configurations.compile.resolutionStrategy {
+        cacheChangingModulesFor 0, 'seconds'
+	}
+
+
+==============================
+Chapter 06 Multiproject builds
+==============================
+
+----------------------------------------------------------------------------------------------------------------------------------
+6.1 Modularizing a project
+----------------------------------------------------------------------------------------------------------------------------------
+
+The overarching project located in the top-level directory is called the root project, 
+and it has its own right to exist in a multiproject build. 
+It coordinates building the subprojects and can define common or specific behavior for them.
+
+Refactoring to modules
+----------------------
+It’s easy to refactor the existing project structure into the identified modules. 
+For each of the modules, you’ll create a subdirectory with the appropriate name and move the relevant files underneath it. 
+The default source directory src/main/java will stay intact for each of the modules. 
+he only module that requires the default web application source directory src/main/webapp is the Web module.
+
+/todo-modularized
+	build.gradle (empty)
+
+	model/src/main/java/com/manning/gia/todo/model/ToDoItem.java
+
+	repository/src/main/java/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	repository/src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+
+	web/src/main/java/com/manning/gia/todo/web/ToDoServlet.java
+	web/src/main/webapp/css/base.css
+	web/src/main/webapp/css/bg.png
+	web/src/main/webapp/jsp/index.jsp
+	web/src/main/webapp/jsp/todo-list.jsp
+	web/src/main/webapp/WEB-INF/web.xml
+
+	$ gradle projects
+		------------------------------------------------------------
+		Root project
+		------------------------------------------------------------
+
+		Root project 'todo-modularized'
+		No sub-projects
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+6.2 Assembling a multiproject build
+----------------------------------------------------------------------------------------------------------------------------------
+
+/listing_06_01-todo-settings-file
+	build.gradle (empty)
+
+	settings.gradle
+		include 'model'
+		include 'repository', 'web'	
+
+	$ gradle projects
+		Root project 'listing_06_01-todo-settings-file'
+		+--- Project ':model'
+		+--- Project ':repository'
+		\--- Project ':web'
+
+Understanding the Settings API representation
+---------------------------------------------
+Before Gradle assembles the build, it creates an instance of type Settings. 
+The interface Settings is a direct representation of the settings file. 
+Its main purpose is to add the Project instances that are supposed to participate in a multiproject build. 
+In addition to assembling your multiproject build, you can do everything you’re used to in your build.gradle
+script because you have direct access to the Gradle and Project interfaces.
+
+The important takeaway here is that you’re coding toward an instance of the interface Settings in your settings.gradle file. 
+Any method of the interface Settings can be directly invoked as you did by calling include.
+
+Settings execution
+------------------
+Gradle has three distinct lifecycle phases of a build. 
+The settings file is evaluated and executed during the initialization phase before any of the Project instances can be configured.
+When executing a build, Gradle automatically figures out whether a subproject is part of a single or multiproject build. 
+Gradle has rules used to determine the existence of a settings file.
+
+Settings file resolution
+------------------------
+Gradle allows you to run your build from the root project directory or any of the subproject directories as long as they contain a build file. 
+How does Gradle know that a subproject is part of a multiproject build? 
+It needs to find the settings file, which indicates whether the subproject is included in a multiproject build. 
+Gradle uses a two-step process to find a settings file.
+In step 1, Gradle searches for a settings file in a directory called 'master' with the same nesting level as the current directory. 
+If no settings file is found in step 1, Gradle searches for a settings file in the parent directories, starting from the current directory. 
+If one of the steps finds a settings file and the project is included in its definition, the project is considered part of a multiproject build. Otherwise, the project is executed as a single-project build.
+
+Controlling the settings file search behavior
+---------------------------------------------
+There are two command-line parameters that are helpful in determining the search behavior for a settings file:
+
+-u, --no-search-upward: Tells Gradle not to search for a settings file in parent directories. 
+This option is useful if you want to avoid the performance hit of searching all parent directories in a deeply nested project structure.
+
+-c, --settings-file: Specifies the location of the settings file. 
+You may want to use this option if your settings filename deviates from the standard naming convention.
+
+
+/todo-flat-hierarchy
+	master/build.gradle
+	master/settings.gradle
+
+	model/build.gradle
+	model/src/main/java/com/manning/gia/todo/model/ToDoItem.java
+
+	repository/build.gradle
+	repository/src/main/java/com/manning/gia/todo/repository/InMemoryToDoRepository.java
+	repository/src/main/java/com/manning/gia/todo/repository/ToDoRepository.java
+
+	web/build.gradle
+	web/src/main/java/com/manning/gia/todo/web/ToDoServlet.java
+	web/src/main/webapp/css/base.css
+	web/src/main/webapp/css/bg.png
+	web/src/main/webapp/jsp/index.jsp
+	web/src/main/webapp/jsp/todo-list.jsp
+	web/src/main/webapp/WEB-INF/web.xml
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+6.3 Configuring subprojects
+----------------------------------------------------------------------------------------------------------------------------------
+
+Understanding the Project API representation
+--------------------------------------------
+For implementing multiproject builds, there are specific methods in the Project API.
+For declaring project-specific build code, the method 'project' is used. 
+At the very least, the path of the project (for example, :model) has to be provided.
+Many times, you’ll find yourself wanting to define common behavior for all your projects or only the subprojects of your build. 
+For each of these use cases, the Project API provides a specialized method: 'allprojects' and 'subprojects'. 
+Let’s say you want to apply the Java plugin to all of your subprojects because you need to compile Java source code. 
+You can do so by defining the code within the subprojects closure parameter.
+
+The default evaluation order of projects in a multiproject build is based on their alphanumeric name. 
+To gain explicit control over the evaluation order at configuration time of the build lifecycle,
+you can use the project evaluation methods evaluationDependsOn() and evaluationDependsOnChildren(). 
+This is especially the case if you need to make sure that a property is set for a project before it’s used by another project. 
+
+Property inheritance
+--------------------
+Properties defined in a project are automatically inherited by its subprojects.
+The extra property projectIds declared in the root project is available to the subprojects model, repository, and web.
+
+/listing_06_02-todo-specific-project-behavior
+	build.gradle
+		ext.projectIds = ['group': 'com.manning.gia', 'version': '0.1']
+
+		group = projectIds.group
+		version = projectIds.version
+
+		project(':model') {
+		    group = projectIds.group
+		    version = projectIds.version
+		    apply plugin: 'java'
+		}
+
+		project(':repository') {
+		    group = projectIds.group
+		    version = projectIds.version
+		    apply plugin: 'java'
+		}
+
+		project(':web') {
+		    group = projectIds.group
+		    version = projectIds.version
+		    apply plugin: 'java'
+		    apply plugin: 'war'
+		    apply plugin: 'jetty'
+
+		    repositories {
+		        mavenCentral()
+		    }
+
+		    dependencies {
+		        providedCompile 'javax.servlet:servlet-api:2.5'
+		        runtime 'javax.servlet:jstl:1.1.2'
+		    }
+		}
+Note: This solution is far from perfect.
+
+	$ gradle -q projects
+
+	$ gradle -q :model:build
+
+Missing subproject dependency.
+	$ gradle -q :repository:build
+		:repository:compileJava FAILED
+
+
+Declaring project dependencies
+------------------------------
+Declaring a dependency on another project looks very similar to declaring a dependency on an external library. 
+In both cases, the dependency has to be declared within the closure of the dependencies configuration block. 
+Project dependencies have to be assigned to a particular configuration — in this case, the configuration compile provided by the Java plugin. 
+
+The subproject 'repository' depends on the subproject 'model', and the subproject 'web' depends on the sibling project 'repository'. 
+That’s all there is to modeling project dependencies. Doing so has three important implications:
+1.	The actual dependency of a project dependency is the library it creates. 
+	In the case of the subproject model, it’s the JAR file. 
+	That’s why a project dependency is also called a lib dependency.
+	
+2.	Depending on another project also adds its transitive dependencies to the classpath. 
+	That means external dependencies and other project dependencies are added as well.
+
+3.	During the initialization phase of the build lifecycle, Gradle determines the execution order of projects. 
+	Depending on another subproject means that it has to be built first. After all, you’re depending on its library.
+
+/listing_06_03-todo-project-dependencies
+	build.gradle
+		project(':repository') {
+		    dependencies {
+		        compile project(':model')
+		    }
+		}
+
+		project(':web') {
+		    dependencies {
+		        compile project(':repository')
+		        providedCompile 'javax.servlet:servlet-api:2.5'
+		        runtime 'javax.servlet:jstl:1.1.2'
+		    }
+		}
+
+	$ gradle -q :repository:build
+
+
+Executing A Task From The Root Project
+--------------------------------------
+After passing the initialization phase, Gradle holds an internal model of the project’s dependencies in memory.
+Gradle executes the tasks that are required from all subprojects including the support for incremental builds.
+
+	$ gradle -q build
+
+
+Partial multiproject builds
+---------------------------
+Oftentimes you know which source files have been changed in what subproject. 
+For these situations, Gradle provides a feature called partial builds. 
+Partial builds are enabled through the command-line option –a or --no-rebuild.
+
+By using partial builds, you can avoid the cost of checking the subproject model and bring down your build execution time.
+
+	$ gradle :repository:build -a
+
+	$ gradle :repository:buildNeeded
+
+	$ gradle :repository:buildDependents
+
+
+Declaring cross-project task dependencies
+-----------------------------------------
+If you execute a specific task from the root project Gradle invokes all tasks with the same name across all subprojects,
+with the execution order for the task build determined by the declared compile-time project dependencies. 
+If your project doesn’t rely on project dependencies, or defines a task with the same name for the root project 
+and one or more subprojects, the story is different.
+
+Default Task Execution Order
+----------------------------
+None of the tasks declares a dependency on another task. 
+So how does Gradle know in which order to execute the tasks? 
+Simple: the task on the root level of the multiproject build is always executed first. 
+For the subprojects, execution order is solely determined by the alphanumeric order of the names of the projects: model comes before repository. 
+Keep in mind that the declaration order of the subprojects within the settings files doesn’t play any role in the execution order.
+
+/listing_06_04-todo-cross-project-tasks
+	build.gradle
+		task hello <<          { println 'Hello from root project' }
+		project(':model')      { task hello << { println 'Hello from model project' } }
+		project(':repository') { task hello << { println 'Hello from repository project' } }
+
+	$ gradle hello
+		:hello
+		Hello from root project
+		:model:hello
+		Hello from model project
+		:repository:hello
+		Hello from repository project
+
+
+Controlling The Task Execution Order
+------------------------------------
+You can determine the task execution order by declaring a cross-project task dependency. 
+To do so, you need to reference the path to the task from a different project.
+
+Controlling the execution order between tasks across different projects isn’t limited to tasks with identical names. 
+The same mechanics apply if you need to control the execution order for tasks with different names. 
+All you need to do is reference the full path when declaring the task dependency.
+
+/listing_06_05-todo-cross-project-task-dependencies
+	build.gradle
+		task hello << { println 'Hello from root project' }
+		project(':model') {
+		   task hello(dependsOn: ':repository:hello') << {
+		      println 'Hello from model project'
+		   }
+		}
+		project(':repository') { task hello << { println 'Hello from repository project' } }
+
+	$ gradle hello
+        :hello
+        Hello from root project
+        :repository:hello
+        Hello from repository project
+        :model:hello
+        Hello from model project
+
+
+Defining common behavior
+------------------------
+This section will improve the existing code by using the 'allprojects' and 'subprojects' methods.
+
+You want to use the allprojects method for setting the 'group' and 'version' properties of the root project and subprojects. 
+Because the root project doesn’t define any Java code, you don’t need to apply the Java plugin. 
+Only the subprojects are Java-specific. You can use the subprojects method to apply the plugins to just the subprojects.
+
+
+/listing_06_06-todo-common-project-behavior
+	build.gradle
+		allprojects {
+		    group = 'com.manning.gia'
+		    version = '0.1'
+		}
+
+		subprojects {
+		    apply plugin: 'java'
+		}
+
+	$ gradle build
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+6.4 Individual project files
+----------------------------------------------------------------------------------------------------------------------------------
+You can drive the separation of concerns even further by creating individual build.gradle files for each of the projects.
+
+build.gradle
+settings.gradle
+
+model
+	build.gradle
+	src/main/java/...
+
+repository
+	build.gradle
+	src/main/java/...
+
+web
+	build.gradle
+	src/main/java/...
+	src/main/webapp/...
+
+/listing_06_07-09-todo-individual-build-scripts
+	build.gradle
+		allprojects {
+		    group = 'com.manning.gia'
+		    version = '0.1'
+		}
+
+		subprojects {
+		    apply plugin: 'java'
+		}
+
+	model/build.gradle
+		empty
+
+	repository/build.gradle
+		dependencies {
+		   compile project(':model')
+		}
+
+	web/build.gradle
+		apply plugin: 'war'
+		apply plugin: 'jetty'
+
+		repositories {
+		   mavenCentral()
+		}
+		dependencies {
+		   compile project(':repository')
+		   providedCompile 'javax.servlet:servlet-api:2.5'
+		   runtime 'javax.servlet:jstl:1.1.2'
+		}
+
+	$ gradle build
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+6.5 Customizing projects
+----------------------------------------------------------------------------------------------------------------------------------
+The standard Gradle build filename is build.gradle. 
+In a multiproject build with many subprojects, you may want to be more expressive when it comes to naming your build files.
+
+build.gradle
+settings.gradle
+
+todo-model
+	model.gradle
+	src/main/java/...
+
+todo-repository
+	repository.gradle
+	src/main/java/...
+
+todo-web
+	web.gradle
+	src/main/java/...
+	src/main/webapp/...
+
+/listing_06_10-todo-custom-build-script-names
+	settings.gradle
+		include 'todo-model', 'todo-repository', 'todo-web'
+
+		rootProject.name = 'todo'
+
+		rootProject.children.each {
+		    it.buildFileName = it.name + '.gradle' - 'todo-'
+		}
+
+
+
+==============================
+Chapter 07 Testing with Gradle
+==============================
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.1 Automated testing
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.2 Testing Java applications
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.3 Unit testing
+----------------------------------------------------------------------------------------------------------------------------------
+
+/listing_07_01-02-junit-test-failing
+	build.gradle (root)
+
+	build.gradle (repository)
+		dependencies {
+		    compile project(':model')
+		    testCompile 'junit:junit:4.11'
+		}	
+
+	$ gradle :repository:test
+		...
+		:repository:compileTestJava
+		:repository:processTestResources UP-TO-DATE
+		:repository:testClasses
+		:repository:test
+
+		com.manning.gia.todo.repository.InMemoryToDoRepositoryTest > testInsertToDoItem FAILED
+		    java.lang.AssertionError at InMemoryToDoRepositoryTest.java:24
+
+		1 test completed, 1 failed
+		:repository:test FAILED
+
+		FAILURE: Build failed with an exception.
+
+	$ gradle -i :repository:test
+		Info level logging gives much more detail.
+s
+
+/listing_07_01-02-junit-test-successful
+	$ gradle :repository:test
+		...
+		:repository:compileTestJava
+		:repository:processTestResources UP-TO-DATE
+		:repository:testClasses
+		:repository:test
+
+		BUILD SUCCESSFUL
+
+	Report:
+		file:///.../listing_07_01-02-junit-test-successful/repository/build/reports/tests/test/index.html
+
+/listing_07_03-testng-test
+	build.gradle (repository)
+		dependencies {
+		    compile project(':model')
+		    testCompile 'org.testng:testng:6.8'
+		}
+
+		test.useTestNG()
+
+	$ gradle :repository:test
+
+	
+/listing_07_04-spock-test
+	build.gradle (repository)
+		apply plugin: 'groovy'
+
+		dependencies {
+		    compile project(':model')
+		    testCompile 'org.codehaus.groovy:groovy:2.0.6'
+		    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+		}
+
+	$ gradle :repository:test
+
+
+/listing_07_05-mixed-test-frameworks
+	build.gradle (repository)
+		apply plugin: 'groovy'
+
+		dependencies {
+		    compile project(':model')
+		    testCompile 'junit:junit:4.11'
+		    testCompile 'org.testng:testng:6.8'
+		    testCompile 'org.codehaus.groovy:groovy:2.0.6'
+		    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
+		}
+
+		task testNG(type: Test) {
+		    useTestNG()
+		}
+
+		test.dependsOn testNG
+
+	$ gradle :repository:test
+
+
+/listing_07_06-test-report-aggregation
+	build.gradle (repository)
+		task aggregateTestReports(type: TestReport) {
+		    destinationDir = test.reports.html.destination
+		    reportOn test, testNG
+		}
+
+		check.dependsOn aggregateTestReports
+
+	$ gradle :repository:test
+
+	Report:
+		file:///.../listing_07_06-test-report-aggregation/repository/build/reports/tests/test/index.html
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.4 Configuring test execution
+----------------------------------------------------------------------------------------------------------------------------------
+
+/listing_07_07-08-test-configuration
+	build.gradle (repository)
+		test {
+		    systemProperty 'items', '20'
+		    jvmArgs '-Xms128m', '-Xmx256m', '-XX:MaxPermSize=128m'
+
+		    testLogging {
+		        showStandardStreams = true
+		    }
+		}
+
+	$ gradle :repository:test
+
+
+/listing_07_09-test-logging-streams
+	build.gradle (repository)
+		test {
+		    systemProperty 'items', '20'
+
+		    testLogging {
+		        showStandardStreams = true
+		    }
+		}
+
+	$ gradle :repository:test
+
+
+/listing_07_10-test-logging-exception-format
+	build.gradle (repository)
+		test {
+		    testLogging {
+		        exceptionFormat 'full'
+		    }
+		}
+
+	$ gradle :repository:test
+
+
+/listing_07_11-test-logging-events
+	build.gradle (repository)
+		test {
+		    testLogging {
+		        events 'started', 'passed', 'skipped', 'failed'
+		    }
+		}
+
+	$ gradle :repository:test
+		:repository:test
+		com.manning.gia.todo.repository.InMemoryToDoRepositoryTest > testInsertToDoItem STARTED
+		com.manning.gia.todo.repository.InMemoryToDoRepositoryTest > testInsertToDoItem PASSED
+
+		BUILD SUCCESSFUL
+
+
+/listing_07_12-parallel-test-execution
+	build.gradle (repository)
+		test {
+		    testLogging {
+		        exceptionFormat 'full'
+		        events 'passed', 'skipped', 'failed'
+		    }
+
+		    forkEvery = 5
+		    maxParallelForks = determineMaxParallelForks()
+		}
+
+		def determineMaxParallelForks() {
+		    (Runtime.runtime.availableProcessors() / 2) < 1 ? 1 : Runtime.runtime.availableProcessors() / 2
+		}
+
+	$ gradle :repository:test
+
+
+
+
+/listing_07_13-test-lifecyle-hook
+	build.gradle (repository)
+		apply plugin: 'announce'
+
+		test.afterSuite { TestDescriptor suite, TestResult result ->
+		    if (!suite.parent && result.getTestCount() > 0) {
+		        long elapsedTestTime = result.getEndTime() - result.getStartTime()
+		        announce.announce("Elapsed time for execution of ${result.getTestCount()} test(s): $elapsedTestTime ms", 'local')
+		    }
+		}
+
+	$ gradle :repository:test
+
+
+/listing_07_14-test-listener
+	build.gradle (repository)
+		apply plugin: 'announce'
+
+		test.addTestListener(new NotificationTestListener(project))
+
+		class NotificationTestListener implements TestListener {
+		    final Project project
+
+		    NotificationTestListener(Project project) {
+		        this.project = project
+		    }
+
+		    @Override
+		    void afterSuite(TestDescriptor suite, TestResult result) {
+		        if (!suite.parent && result.getTestCount() > 0) {
+		            long elapsedTestTime = result.getEndTime() - result.getStartTime()
+		            project.announce.announce("Elapsed time for execution of ${result.getTestCount()} test(s): $elapsedTestTime ms", 'local')
+		        }
+		    }
+
+		    @Override
+		    void afterTest(TestDescriptor testDescriptor, TestResult result) {}
+
+		    @Override
+		    void beforeSuite(TestDescriptor suite) {}
+
+		    @Override
+		    void beforeTest(TestDescriptor testDescriptor) {}
+		}
+
+	$ gradle :repository:test
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.5 Integration testing
+----------------------------------------------------------------------------------------------------------------------------------
+
+/listing_07_15-16-integration-test-mixed
+	build.gradle (repository)
+		apply from: 'databaseSetup.gradle'
+
+		dependencies {
+		    compile project(':model')
+		    runtime 'com.h2database:h2:1.3.170'
+		    testCompile 'junit:junit:4.11'
+		}
+
+		test {
+		    exclude '**/*IntegTest.class'
+		    reports.html.destination = file("$reports.html.destination/unit")
+		    reports.junitXml.destination = file("$reports.junitXml.destination/unit")
+		}
+
+		task integrationTest(type: Test) {
+		    description = 'Runs the integration tests.'
+		    group = 'verification'
+		    include '**/*IntegTest.class'
+		    reports.html.destination = file("$reports.html.destination/integration")
+		    reports.junitXml.destination = file("$reports.junitXml.destination/integration")
+		    dependsOn startAndPrepareDatabase
+		    finalizedBy stopDatabase
+		}
+
+		tasks.withType(Test) {
+		    testLogging {
+		        showStandardStreams = true
+		        exceptionFormat 'full'
+		    }
+		}
+
+		check.dependsOn integrationTest
+
+	$ gradle :repository:build
+
+
+/listing_07_17-18-integration-test-separated
+	build.gradle (repository)
+		sourceSets {
+		    integrationTest {
+		        java.srcDir file('src/integTest/java')
+		        resources.srcDir file('src/integTest/resources')
+		        compileClasspath = sourceSets.main.output + configurations.testRuntime
+		        runtimeClasspath = output + compileClasspath
+		    }
+		}
+
+		task integrationTest(type: Test) {
+		    description = 'Runs the integration tests.'
+		    group = 'verification'
+		    testClassesDir = sourceSets.integrationTest.output.classesDir
+		    classpath = sourceSets.integrationTest.runtimeClasspath
+		    reports.html.destination = file("$reports.html.destination/integration")
+		    reports.junitXml.destination = file("$reports.junitXml.destination/integration")
+		    dependsOn startAndPrepareDatabase
+		    finalizedBy stopDatabase
+		}
+
+		tasks.withType(Test) {
+		    testLogging {
+		        showStandardStreams = true
+		        exceptionFormat 'full'
+		    }
+		}
+
+		check.dependsOn integrationTest
+
+	$ gradle :repository:build
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+7.6 Functional testing
+----------------------------------------------------------------------------------------------------------------------------------
+
+/listing_07_19-23-functional-test-geb
+	build.gradle (web)
+		apply plugin: 'war'
+		apply plugin: 'jetty'
+		apply plugin: 'groovy'
+
+		configurations {
+		    functTestCompile.extendsFrom testCompile
+		    functTestRuntime.extendsFrom testRuntime
+		}
+
+		ext.seleniumGroup = 'org.seleniumhq.selenium'
+		ext.seleniumVersion = '2.32.0'
+
+		dependencies {
+		    compile project(':repository')
+		    providedCompile 'javax.servlet:servlet-api:2.5'
+		    runtime 'javax.servlet:jstl:1.1.2'
+		    testCompile 'org.codehaus.groovy:groovy:2.0.6'
+		    testCompile 'junit:junit:4.11'
+		    functTestCompile 'org.codehaus.geb:geb-junit4:0.7.2'
+		    functTestCompile "$seleniumGroup:selenium-api:$seleniumVersion"
+		    functTestRuntime "$seleniumGroup:selenium-firefox-driver:$seleniumVersion"
+		}
+
+		sourceSets {
+		    functionalTest {
+		        groovy.srcDir file('src/functTest/groovy')
+		        resources.srcDir file('src/functTest/resources')
+		        compileClasspath = sourceSets.main.output + configurations.functTestCompile
+		        runtimeClasspath = output + compileClasspath + configurations.functTestRuntime
+		    }
+		}
+
+		ext {
+		    functionalJettyStopPort = 8081
+		    functionalJettyStopKey = 'stopKey'
+		}
+
+		task functionalJettyRun(type: org.gradle.api.plugins.jetty.JettyRun) {
+		    stopPort = functionalJettyStopPort
+		    stopKey = functionalJettyStopKey
+		    contextPath = 'todo'
+		    daemon = true
+		}
+
+		task functionalJettyStop(type: org.gradle.api.plugins.jetty.JettyStop) {
+		    stopPort = functionalJettyStopPort
+		    stopKey = functionalJettyStopKey
+		}
+
+		task functionalTest(type: Test) {
+		    testClassesDir = sourceSets.functionalTest.output.classesDir
+		    classpath = sourceSets.functionalTest.runtimeClasspath
+		    reports.html.destination = file("$reports.html.destination/functional")
+		    reports.junitXml.destination = file("$reports.junitXml.destination/functional")
+		    systemProperty 'geb.env', 'firefox'
+		    systemProperty 'geb.build.reportsDir', reporting.file("$name/geb")
+		    dependsOn functionalJettyRun
+		    finalizedBy functionalJettyStop
+		}
+
+		check.dependsOn functionalTest
+
+	$ gradle :web:build
+
+
+===========================
+Chapter 08 Extending Gradle
+===========================
+
+----------------------------------------------------------------------------------------------------------------------------------
+8.1 Introducing the plugin case study
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+8.2 From zero to plugin
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+8.3 Writing a script plugin
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+8.4 Writing custom task classes
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+8.5 Using and building object plugins
+----------------------------------------------------------------------------------------------------------------------------------
+
+====================================
+Chapter 09 Integration and migration
+====================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+9.1 Ant and Gradle
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+9.2 Maven and Gradle
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+9.3 Comparing builds
+----------------------------------------------------------------------------------------------------------------------------------
+
+								+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+								+++ PART 3:   F R O M    B U I L D   T O   D E P L O Y M E N T  +++
+								+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+==================================
+Chapter 10 IDE support and tooling
+==================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+10.1 Using IDE plugins to generate project files
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+10.2 Managing Gradle projects in popular IDEs
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+10.3 Embedding Gradle with the tooling API
+----------------------------------------------------------------------------------------------------------------------------------
+
+=====================================
+Chapter 11 Building polyglot projects
+=====================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+11.1 Managing JavaScript with Gradle
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+11.2 Building polyglot, JVM-based projects
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+11.3 Other languages
+----------------------------------------------------------------------------------------------------------------------------------
+
+=================================================
+Chapter 12 Code quality management and monitoring
+=================================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+12.1 Integrating code analysis into your build
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+12.2 Measuring code coverage
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+12.3 Performing static code analysis
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+12.4 Integrating with Sonar
+----------------------------------------------------------------------------------------------------------------------------------
+
+=================================
+Chapter 13 Continuous integration
+=================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+13.1 Benefits of continuous integration
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+13.2 Setting up Git
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+13.3 Building a project with Jenkins
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+13.4 Building a project with Jenkins
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+13.5 Modeling a build pipeline with Jenkins
+----------------------------------------------------------------------------------------------------------------------------------
+
+===========================================
+Chapter 14 Artifact assembly and publishing
+===========================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+14.1 Building artifacts and distributions
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+14.2 Publishing artifacts to a binary repository
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+14.3 Publishing to a public binary repository
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+14.4 Artifact assembly and publishing as part of the build pipeline
+----------------------------------------------------------------------------------------------------------------------------------
+=====================================================
+Chapter 15 Infrastructure provisioning and deployment
+=====================================================
+
+----------------------------------------------------------------------------------------------------------------------------------
+15.1 Infrastructure provisioning
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+15.2 Targeting a deployment environment 
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+15.3 Automated deployments
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+15.4 Deployment tests
+----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+15.5 Deployment as part of the build pipeline
+----------------------------------------------------------------------------------------------------------------------------------
